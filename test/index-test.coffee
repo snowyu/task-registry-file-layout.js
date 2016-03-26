@@ -21,7 +21,9 @@ describe 'FileLayoutTask', ->
   task = FileLayout()
 
   describe 'register layout', ->
-    beforeEach -> task.layouts = {}
+    beforeEach ->
+      task.layouts = {}
+      task.defaultLayout = null
     describe 'sync', ->
       it 'should register a layout via resource object', ->
         file = Resource './fixture/main.layout.md', cwd:__dirname
@@ -38,6 +40,12 @@ describe 'FileLayoutTask', ->
         task.executeSync file
         expect(task.layouts).to.have.property 'main'
         expect(task.layouts.main).to.have.property('content').include 'main before'
+      it 'should register a default layout', ->
+        file = isDefaultLayout: true, path: path.join __dirname, './fixture/main.layout.md'
+        task.executeSync file
+        expect(task.layouts).to.have.property 'main'
+        expect(task.layouts.main).to.have.property('content').include 'main before'
+        expect(task.defaultLayout).to.be.equal 'main'
       it 'should register a layout with layoutBase option', ->
         file = layoutBase: 'one', path: path.join __dirname, './fixture/main.layout.md'
         task.executeSync file
@@ -78,6 +86,13 @@ describe 'FileLayoutTask', ->
           expect(task.layouts).to.have.property 'main'
           expect(task.layouts.main).to.have.property('content').include 'main before'
           done(err)
+      it 'should register a default layout', (done)->
+        file = isDefaultLayout:true, path: path.join __dirname, './fixture/main.layout.md'
+        task.execute file, (err)->
+          expect(task.layouts).to.have.property 'main'
+          expect(task.layouts.main).to.have.property('content').include 'main before'
+          expect(task.defaultLayout).to.be.equal 'main'
+          done(err)
       it 'should register a layout with layoutBase option', (done)->
         file = layoutBase: 'one', path: path.join __dirname, './fixture/main.layout.md'
         task.execute file, (err)->
@@ -108,6 +123,7 @@ describe 'FileLayoutTask', ->
         one: {content: 'one before\n{% body %}\none after', layout: 'two'}
         two: {content: 'two before\n{% body %}\ntwo after'}
         main: {content: 'main before\n{% body %}\nmain after'}
+      task.defaultLayout = null
 
     describe 'sync', ->
       it 'should apply a layout via resource object', ->
@@ -122,6 +138,11 @@ describe 'FileLayoutTask', ->
         file = layout: 'one', path: path.join __dirname, './fixture/README.md'
         result = task.executeSync file
         expect(result).to.be.equal 'two before\none before\nthis is the test folder.\none after\ntwo after'
+      it 'should apply a layout with default layout', ->
+        task.defaultLayout = 'main'
+        file = layout: 'two', path: path.join __dirname, './fixture/README.md'
+        result = task.executeSync file
+        expect(result).to.be.equal 'main before\ntwo before\nthis is the test folder.\ntwo after\nmain after'
     describe 'async', ->
       it 'should apply a layout via resource object', (done)->
         file = Resource './fixture/README.md', cwd:__dirname, layout: 'main'
