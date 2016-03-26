@@ -1,7 +1,7 @@
 {
   "name": "task-registry-file-layout",
   "description": "The task will apply a layout to the file contents.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "homepage": "https://github.com/snowyu/task-registry-file-layout.js",
   "repository": {
     "type": "git",
